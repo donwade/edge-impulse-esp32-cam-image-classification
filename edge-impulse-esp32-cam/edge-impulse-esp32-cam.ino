@@ -20,19 +20,39 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library for ST7735
 
-#define TFT_SCLK 14 // SCL
-#define TFT_MOSI 13 // SDA
-#define TFT_RST  12 // RES (RESET)
-#define TFT_DC    2 // Data Command control pin
-#define TFT_CS   15 // Chip select control pin
-                    // BL (back light) and VCC -> 3V3
+#define ST7735   0  // legacy
+#define ST7789   1  // my new display
+
+#if ST7735
+    #define TFT_SCLK 14 // SCL
+    #define TFT_MOSI 13 // SDA
+    #define TFT_RST  12 // RES (RESET)
+    #define TFT_DC    2 // Data Command control pin
+    #define TFT_CS   15 // Chip select control pin
+    #define TFT_BL  VCC //
+
+    Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
+
+#elif ST7789
+    #define TFT_SCLK 14 // orange SCL
+    #define TFT_MOSI 13 // green  SDA
+    #define TFT_RST  -1 // brown  NC (RESET)
+    #define TFT_DC   32 // blue  Data Command control pin
+    #define TFT_CS   33 // yellow Chip select control pin
+    #define TFT_BL  VCC // grey
+    #define TFT_GND GND // white
+    #define TFT_VCC VCC // purple
+
+    Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
+#else
+    #error "PICK ORIGINAL or ST7789
+#endif
 
 #define BTN       4 // button (shared with flash led)
 
 dl_matrix3du_t *resized_matrix = NULL;
 ei_impulse_result_t result = {0};
 
-Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
 
 // setup
 void setup() {
@@ -58,14 +78,19 @@ void setup() {
   config.pin_d5 = Y7_GPIO_NUM;
   config.pin_d6 = Y8_GPIO_NUM;
   config.pin_d7 = Y9_GPIO_NUM;
+
   config.pin_xclk = XCLK_GPIO_NUM;
   config.pin_pclk = PCLK_GPIO_NUM;
+  
   config.pin_vsync = VSYNC_GPIO_NUM;
   config.pin_href = HREF_GPIO_NUM;
+
   config.pin_sscb_sda = SIOD_GPIO_NUM;
   config.pin_sscb_scl = SIOC_GPIO_NUM;
+
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
+
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
   config.frame_size = FRAMESIZE_240X240;
